@@ -1,20 +1,31 @@
 const express = require("express");
+
 const app = express();
-const PORT = 5000;
-const path = require("path");
-// setup static and middleware
 
-app.use(express.static("./public"));
-// static assets are files the browser doesn't need to change
+const { products } = require("./data.js");
 
-// app.get("/", (req, res) => {
-//   res.sendFile(path.resolve(__dirname, "./navbar-app/index.html"));
-// });
-
-app.all("*", (req, res) => {
-  res.status(404).send("Resource not found");
+app.get("/", (req, res) => {
+  res.send('<h1>Home Page</h1><a href="/api/products">products</a>');
+});
+app.get("/api/products", (req, res) => {
+  const newProducts = products.map((product) => {
+    const { id, name, image } = product;
+    return { id, name, image };
+  });
+  res.json(newProducts);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is listening on PORT ${PORT}`);
+app.get("/api/products/:id", (req, res) => {
+  const id = req.params.id;
+  const singleProduct = products.find((product) => {
+    return product.id === Number(id);
+  });
+  if (!singleProduct) {
+    return res.status(404).send("Product does not exist");
+  }
+  res.json(singleProduct);
+});
+
+app.listen(5000, () => {
+  console.log(`Server is listening on port 5000...`);
 });
